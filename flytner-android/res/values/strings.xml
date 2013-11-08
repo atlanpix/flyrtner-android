@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <string name="app_id">382352378563410</string>
 
     <string name="app_name">flytner</string>
     <string name="action_settings">Settings</string>

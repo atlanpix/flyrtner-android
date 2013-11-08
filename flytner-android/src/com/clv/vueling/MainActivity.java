@@ -14,8 +14,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.clv.vueling.model.Flight;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.model.GraphUser;
 
 public class MainActivity extends ListActivity implements OnItemClickListener {
 
@@ -33,14 +39,60 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 		FlightAdapter adapter = new FlightAdapter();
 		setListAdapter(adapter);
 		getListView().setOnItemClickListener(this);
+		
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> adapterView, View v, int position, long id) {
-		Flight flight = (Flight) adapterView.getItemAtPosition(position);
-		Intent i = new Intent(mContext, FlightActivity.class);
-		i.putExtra(Flight.TAG, flight);
-		startActivity(i);
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		Session.getActiveSession().onActivityResult(this, requestCode,
+				resultCode, data);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View v, int position,
+			long id) {
+		Session session = Session.getActiveSession();
+		if (session == null || !session.isOpened()) {
+			facebookLogin();
+		} else {
+			Flight flight = (Flight) adapterView.getItemAtPosition(position);
+			Intent i = new Intent(mContext, FlightActivity.class);
+			i.putExtra(Flight.TAG, flight);
+			startActivity(i);
+		}
+	}
+
+	private void facebookLogin() {
+		// start Facebook Login
+		Session.openActiveSession(this, true, new Session.StatusCallback() {
+
+			// callback when session changes state
+			@Override
+			public void call(Session session, SessionState state,
+					Exception exception) {
+				if (session.isOpened()) {
+
+					// make request to the /me API
+					Request.executeMeRequestAsync(session,
+							new Request.GraphUserCallback() {
+
+								// callback after Graph API response with user
+								// object
+								@Override
+								public void onCompleted(GraphUser user,
+										Response response) {
+									if (user != null) {
+										Toast.makeText(mContext,
+												user.getName(),
+												Toast.LENGTH_LONG).show();
+									}
+								}
+							});
+				}
+			}
+		});
+
 	}
 
 	class FlightAdapter extends BaseAdapter {
