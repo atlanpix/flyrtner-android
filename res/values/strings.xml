@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">vueling-hackaton</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_section1">Chat</string>
+    <string name="title_section2">Passengers</string>
+    <string name="title_section3">Taxis</string>
+    
+</resources>
