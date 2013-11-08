@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -62,6 +64,25 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 			startActivity(i);
 		}
 	}
+	
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        // Respond to the action bar's Up/Home button
+        case R.id.action_profile:
+        	Intent i = new Intent(this, LogoutActivity.class);
+        	startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 	private void facebookLogin() {
 		// start Facebook Login
@@ -84,7 +105,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 										Response response) {
 									if (user != null) {
 										Toast.makeText(mContext,
-												user.getName(),
+												getText(R.string.logged) + " " + user.getName(),
 												Toast.LENGTH_LONG).show();
 									}
 								}
