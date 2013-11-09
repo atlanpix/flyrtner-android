@@ -1,6 +1,8 @@
 package com.clv.vueling;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
@@ -41,6 +43,7 @@ public class ChatActivity extends Activity {
 	private DatabaseAdapter db;
 	private String idChat;
 	private String idUser;
+	private String nameUser;
 	private final WebSocketConnection mConnection = new WebSocketConnection();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,7 @@ public class ChatActivity extends Activity {
 
 		idChat = (String)getIntent().getSerializableExtra("idChat");
 		idUser = Preferences.getIdUser(getBaseContext());
+		nameUser = Preferences.getUserName(getBaseContext());
 		messagesContainer = (ViewGroup) findViewById(R.id.messagesContainer);
 		scrollContainer = (ScrollView) findViewById(R.id.scrollView1);
 		Bitmap image= (Bitmap) getIntent().getParcelableExtra("bimage");
@@ -95,8 +99,7 @@ public class ChatActivity extends Activity {
 	private void start() {
 
 		db.open(); // FIXME
-		final String wsuri = Preferences.WS+"room/chat?username="+"paco"+"&amp;userId="+idUser+"&amp;pid="+idChat+"&amp;typeChat=2";
-
+		final String wsuri = Preferences.WS+"room/chat?username="+URLEncoder.encode(nameUser)+"&amp;userId="+idUser+"&amp;pid="+idChat+"&amp;typeChat=2";
 		Log.d("INFO2","WS: "+wsuri);
 		try {
 			mConnection.connect(wsuri, new WebSocketHandler() {
@@ -115,24 +118,24 @@ public class ChatActivity extends Activity {
 					//control
 					ObjectMapper mapper = new ObjectMapper();
 					JsonNode aux;
-
+					
 					try {
 						aux = mapper.readTree(payload);
 						String kind = aux.findPath("kind").getTextValue();
 						String user = aux.findPath("user").getTextValue();
 						String message = aux.findPath("message").getTextValue();
+						String username = aux.findPath("username").getTextValue();
 
 						Log.d("INFO2", "KInd: "+kind);
 						Log.d("INFO2", "User: "+user);
 						Log.d("INFO2", "KInd: "+message);
+						Log.d("INFO2", "username: "+username);
+
 						//prueba recibir
 						if(kind.equals("talk") && !user.equals(idUser)){
 							showMessage(message,true);
 							db.insertMessage(idChat, user, message, Integer.toString(message.length()), "texto", true);
 							db.updateLastMessage(idChat, message);
-
-						}
-						if(kind.equals("type") && !user.equals(idUser)){
 
 						}
 

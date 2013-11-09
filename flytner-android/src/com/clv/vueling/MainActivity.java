@@ -64,9 +64,10 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 		mUser = mAppData.getUser();
 		mProgressDialog = new ProgressDialog(mContext);
 		mProgressDialog.setCancelable(false);
-		mFlights = new ArrayList<Flight>();
-		mFlights.add(new Flight("vuelo prueba", "origen", "destino", "1"));
-		mFlights.add(new Flight("vuelo prueba2", "origen2", "destino2", "2"));
+		mFlights = mAppData.getFlights();
+		if (mFlights == null) {
+			mFlights = new ArrayList<Flight>();
+		}
 		FlightAdapter adapter = new FlightAdapter();
 		setListAdapter(adapter);
 		getListView().setOnItemClickListener(this);
@@ -94,18 +95,22 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 				}
 			}
 		}
+		if (requestCode == LogoutActivity.CODE) {
+			facebookLogin();
+		}
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View v, int position, long id) {
-		if (mUser == null) {
-			facebookLogin();
-		} else {
+	    final Session session = Session.getActiveSession();
+	    if (session != null && session.isOpened()) {
 			Flight flight = (Flight) adapterView.getItemAtPosition(position);
 			Intent i = new Intent(mContext, ChatActivity.class);
 			// i.putExtra(Flight.TAG, flight);
-			i.putExtra("idChat", flight.getId());
+			i.putExtra("idChat", flight.getFlightNumber());
 			startActivity(i);
+		} else {
+			launchFacebookActivity();
 		}
 	}
 
@@ -121,49 +126,74 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 		switch (item.getItemId()) {
 		// Respond to the action bar's Up/Home button
 		case R.id.action_profile:
-			Intent i = new Intent(this, LogoutActivity.class);
-			startActivity(i);
+			launchFacebookActivity();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	private void launchFacebookActivity() {
+		Intent i = new Intent(this, LogoutActivity.class);
+		startActivityForResult(i, LogoutActivity.CODE);
+	}
 
 	private void facebookLogin() {
-		mProgressDialog.setMessage(getText(R.string.logging).toString());
-		mProgressDialog.show();
 		// start Facebook Login
-		ArrayList<String> permissions = new ArrayList<String>();
-		permissions.add("email");
-		FacebookUtils.openActiveSession(mActivity, true, new Session.StatusCallback() {
+//		ArrayList<String> permissions = new ArrayList<String>();
+//		permissions.add("email");
+	    final Session session = Session.getActiveSession();
+	    if (session != null && session.isOpened()) {
+			mProgressDialog.setMessage(getText(R.string.logging).toString());
+			mProgressDialog.show();
 
-			// callback when session changes state
-			@Override
-			public void call(final Session session, SessionState state, Exception exception) {
-				if (session.isOpened()) {
+	    	// make request to the /me API
+			Request.newMeRequest(session, new Request.GraphUserCallback() {
 
-					// make request to the /me API
-					Request.newMeRequest(session, new Request.GraphUserCallback() {
-
-						// callback after Graph API response
-						// with user
-						// object
-						@Override
-						public void onCompleted(GraphUser user, Response response) {
-							if (user != null) {
-								Log.i(Constant.TAG, "LOG OK");
-								Toast.makeText(mContext, getText(R.string.logged) + " " + user.getName(),
-										Toast.LENGTH_LONG).show();
-								ourLogin(user, session.getAccessToken());
-							}
-						}
-					}).executeAsync();
+				// callback after Graph API response
+				// with user
+				// object
+				@Override
+				public void onCompleted(GraphUser user, Response response) {
+					if (user != null) {
+						Log.i(Constant.TAG, "LOG OK");
+						Toast.makeText(mContext, getText(R.string.logged) + " " + user.getName(),
+								Toast.LENGTH_LONG).show();
+						ourLogin(user, session.getAccessToken());
+					}
 				}
-			}
-		}, permissions);
+			}).executeAsync();
+	    } 
+
+//		FacebookUtils.openActiveSession(mActivity, true, new Session.StatusCallback() {
+//
+//			// callback when session changes state
+//			@Override
+//			public void call(final Session session, SessionState state, Exception exception) {
+//				if (session.isOpened()) {
+//
+//					// make request to the /me API
+//					Request.newMeRequest(session, new Request.GraphUserCallback() {
+//
+//						// callback after Graph API response
+//						// with user
+//						// object
+//						@Override
+//						public void onCompleted(GraphUser user, Response response) {
+//							if (user != null) {
+//								Log.i(Constant.TAG, "LOG OK");
+//								Toast.makeText(mContext, getText(R.string.logged) + " " + user.getName(),
+//										Toast.LENGTH_LONG).show();
+//								ourLogin(user, session.getAccessToken());
+//							}
+//						}
+//					}).executeAsync();
+//				}
+//			}
+//		}, permissions);
 
 	}
 
-	private void ourLogin(GraphUser user, String token) {
+	private void ourLogin(final GraphUser user, String token) {
 		try {
 			LoginRequest lr = new LoginRequest();
 			lr.setEmail(user.asMap().get("email").toString());
@@ -190,7 +220,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 					mUser = new OurUser();
 					mUser.setUserId(r.getUser_id());
 					mAppData.saveUser(mUser);
-					Preferences.setIdUser(mContext, mUser.getUserId());
+					Preferences.setIdUser(mContext, mUser.getUserId(), user.getName());
 				}
 
 				@Override
@@ -221,6 +251,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 				FlightResponse r = gson.fromJson(content, FlightResponse.class);
 				mFlights.add(new Flight(r.getDestination(), r.getOrigin(), r.getFlyNumber(), r.getId()));
 				((FlightAdapter)getListAdapter()).notifyDataSetChanged();
+				mAppData.saveFlights(mFlights);
 			}
 
 			@Override

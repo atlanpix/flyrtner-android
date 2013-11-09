@@ -12,6 +12,7 @@ public class OurUser {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
+	
 
 	public OurUser() {
 	}

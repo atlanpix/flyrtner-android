@@ -124,10 +124,16 @@ public class Preferences extends Preference {
 		return PreferenceManager.getDefaultSharedPreferences(context)
 				.getString(PREF_KEY_ID_USER, "");
 	}
-	public static void setIdUser (Context context,String id) {
+	
+	public static String getUserName(Context context){
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getString(PREF_KEY_NAME_USER, "");
+	}
+	public static void setIdUser (Context context,String id, String name) {
 		SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor editor = preferences.edit();
 		editor.putString(PREF_KEY_ID_USER, id);
+		editor.putString(PREF_KEY_NAME_USER, name);
 		editor.commit();
 	} 
 	public static boolean isTwitterLoggedInAlready(Context context) {

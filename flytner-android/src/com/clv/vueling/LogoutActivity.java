@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 
 public class LogoutActivity extends FragmentActivity {
+	
+	public static final int CODE = 852385;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
