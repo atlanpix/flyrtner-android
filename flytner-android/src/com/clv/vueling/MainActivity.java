@@ -105,9 +105,8 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 	    final Session session = Session.getActiveSession();
 	    if (session != null && session.isOpened()) {
 			Flight flight = (Flight) adapterView.getItemAtPosition(position);
-			Intent i = new Intent(mContext, ChatActivity.class);
-			// i.putExtra(Flight.TAG, flight);
-			i.putExtra("idChat", flight.getFlightNumber());
+			Intent i = new Intent(mContext, FlightActivity.class);
+			i.putExtra(Flight.TAG, flight);
 			startActivity(i);
 		} else {
 			launchFacebookActivity();

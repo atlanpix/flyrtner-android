@@ -45,38 +45,38 @@ public class ChatActivity extends Activity {
 	private String idUser;
 	private String nameUser;
 	private final WebSocketConnection mConnection = new WebSocketConnection();
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat);
 
-		idChat = (String)getIntent().getSerializableExtra("idChat");
+		idChat = (String) getIntent().getSerializableExtra("idChat");
 		idUser = Preferences.getIdUser(getBaseContext());
 		nameUser = Preferences.getUserName(getBaseContext());
 		messagesContainer = (ViewGroup) findViewById(R.id.messagesContainer);
 		scrollContainer = (ScrollView) findViewById(R.id.scrollView1);
-		Bitmap image= (Bitmap) getIntent().getParcelableExtra("bimage");
+		Bitmap image = (Bitmap) getIntent().getParcelableExtra("bimage");
 
-
-		myEditText = (EditText) findViewById(R.id.editText1); 
+		myEditText = (EditText) findViewById(R.id.editText1);
 		TextWatcher fieldValidatorTextWatcher = new TextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
-				//mConnection.sendTextMessage("{\"text\":\"HOLAAA\"}");
+				// mConnection.sendTextMessage("{\"text\":\"HOLAAA\"}");
 
 			}
 
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				//mConnection.sendTextMessage("{\"text\":\"HOLAAA2\"}");
+				// mConnection.sendTextMessage("{\"text\":\"HOLAAA2\"}");
 			}
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				if (filterLongEnough()) {
-					//Escribiendo...
-//					TODO descomentar
-//					mConnection.sendTextMessage("{\"type\":1}");
+					// Escribiendo...
+					// TODO descomentar
+					// mConnection.sendTextMessage("{\"type\":1}");
 				}
 			}
 
@@ -85,29 +85,30 @@ public class ChatActivity extends Activity {
 			}
 		};
 		myEditText.addTextChangedListener(fieldValidatorTextWatcher);
-		db=new DatabaseAdapter(getBaseContext());
+		db = new DatabaseAdapter(getBaseContext());
 		start();
 	}
 
-	//Logica Chat
+	// Logica Chat
 
-	//Ver si chat creado en la base de datos
-	//Si existe-->cargar chat con mensajes de la base de datos
-	//Si no existe	-->JSON room/create
-	//				-->Insert en la base de datos
+	// Ver si chat creado en la base de datos
+	// Si existe-->cargar chat con mensajes de la base de datos
+	// Si no existe -->JSON room/create
+	// -->Insert en la base de datos
 
 	private void start() {
 
 		db.open(); // FIXME
-		final String wsuri = Preferences.WS+"room/chat?username="+URLEncoder.encode(nameUser)+"&amp;userId="+idUser+"&amp;pid="+idChat+"&amp;typeChat=2";
-		Log.d("INFO2","WS: "+wsuri);
+		final String wsuri = Preferences.WS + "room/chat?username=" + URLEncoder.encode(nameUser) + "&amp;userId="
+				+ idUser + "&amp;pid=" + idChat + "&amp;typeChat=2";
+		Log.d("INFO2", "WS: " + wsuri);
 		try {
 			mConnection.connect(wsuri, new WebSocketHandler() {
 
 				@Override
 				public void onOpen() {
 					Log.d(TAG, "Status: Connected to " + wsuri);
-					//TODO añadir mensajes anteriores
+					// TODO añadir mensajes anteriores
 					loadMessage();
 
 				}
@@ -115,10 +116,10 @@ public class ChatActivity extends Activity {
 				@Override
 				public void onTextMessage(String payload) {
 					Log.d(TAG, "Got echo: " + payload);
-					//control
+					// control
 					ObjectMapper mapper = new ObjectMapper();
 					JsonNode aux;
-					
+
 					try {
 						aux = mapper.readTree(payload);
 						String kind = aux.findPath("kind").getTextValue();
@@ -126,14 +127,14 @@ public class ChatActivity extends Activity {
 						String message = aux.findPath("message").getTextValue();
 						String username = aux.findPath("username").getTextValue();
 
-						Log.d("INFO2", "KInd: "+kind);
-						Log.d("INFO2", "User: "+user);
-						Log.d("INFO2", "KInd: "+message);
-						Log.d("INFO2", "username: "+username);
+						Log.d("INFO2", "KInd: " + kind);
+						Log.d("INFO2", "User: " + user);
+						Log.d("INFO2", "KInd: " + message);
+						Log.d("INFO2", "username: " + username);
 
-						//prueba recibir
-						if(kind.equals("talk") && !user.equals(idUser)){
-							showMessage(message,true);
+						// prueba recibir
+						if (kind.equals("talk") && !user.equals(idUser)) {
+							showMessage(message, true);
 							db.insertMessage(idChat, user, message, Integer.toString(message.length()), "texto", true);
 							db.updateLastMessage(idChat, message);
 
@@ -146,8 +147,6 @@ public class ChatActivity extends Activity {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-
-
 
 				}
 
@@ -163,15 +162,16 @@ public class ChatActivity extends Activity {
 		}
 	}
 
-	public void chatear(View v){
+	public void chatear(View v) {
 
 		Log.d("INFO2", "BOTON CHATEAR");
-		EditText edit = (EditText)findViewById(R.id.editText1);
+		EditText edit = (EditText) findViewById(R.id.editText1);
 		String texto = edit.getText().toString();
-		if(texto != null && texto != ""){
-			mConnection.sendTextMessage("{\"text\":\""+texto + "\"}");
-			//TODO introducir mensaje base de datos
-			db.insertMessage(idChat, Preferences.getIdUser(getBaseContext()), texto, Integer.toString(texto.length()), "texto", true);
+		if (texto != null && texto != "") {
+			mConnection.sendTextMessage("{\"text\":\"" + texto + "\"}");
+			// TODO introducir mensaje base de datos
+			db.insertMessage(idChat, Preferences.getIdUser(getBaseContext()), texto, Integer.toString(texto.length()),
+					"texto", true);
 			db.updateLastMessage(idChat, texto);
 
 		}
@@ -179,11 +179,14 @@ public class ChatActivity extends Activity {
 		showMessage(texto, false);
 
 	}
-	@Override public void onBackPressed() {
+
+	@Override
+	public void onBackPressed() {
 		mConnection.disconnect();
 		db.close();
 		finish();
 	};
+
 	private void showMessage(String message, boolean leftSide) {
 		final TextView textView = new TextView(ChatActivity.this);
 		textView.setTextColor(Color.BLACK);
@@ -191,8 +194,8 @@ public class ChatActivity extends Activity {
 
 		int bgRes = R.drawable.left_message_bg;
 
-		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
 
 		if (!leftSide) {
 			bgRes = R.drawable.right_message_bg;
@@ -215,30 +218,35 @@ public class ChatActivity extends Activity {
 				scrollContainer.fullScroll(View.FOCUS_DOWN);
 			}
 		});
+
+		scrollContainer.post(new Runnable() {
+			@Override
+			public void run() {
+				scrollContainer.fullScroll(View.FOCUS_DOWN);
+			}
+		});
 	}
 
-	public void loadMessage(){
+	public void loadMessage() {
 		Cursor c;
 		db.open();
-		c=db.getMessages(idChat);
-		if(c==null){
-			Log.d("bd","NO HAY NADA BD");
-		}else{
+		c = db.getMessages(idChat);
+		if (c == null) {
+			Log.d("bd", "NO HAY NADA BD");
+		} else {
 
-			if(c.moveToFirst()){
-				do{
-					//Si el mensaje es mio
-					Log.i("DB","ENTRO");
-					if(c.getString(c.getColumnIndex("user_from")).equals(Preferences.getIdUser(getBaseContext())))
-						showMessage(c.getString(c.getColumnIndex("message")),false);
+			if (c.moveToFirst()) {
+				do {
+					// Si el mensaje es mio
+					Log.i("DB", "ENTRO");
+					if (c.getString(c.getColumnIndex("user_from")).equals(Preferences.getIdUser(getBaseContext())))
+						showMessage(c.getString(c.getColumnIndex("message")), false);
 					else
-						showMessage(c.getString(c.getColumnIndex("message")),true);
-				}while(c.moveToNext());
+						showMessage(c.getString(c.getColumnIndex("message")), true);
+				} while (c.moveToNext());
 			}
 			c.close();
 		}
-
-
 
 	}
 }
