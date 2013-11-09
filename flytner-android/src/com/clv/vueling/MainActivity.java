@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.clv.vueling.model.Flight;
 import com.clv.vueling.model.OurUser;
 import com.clv.vueling.model.Preferences;
+import com.clv.vueling.rest.FlightRequest;
 import com.clv.vueling.rest.FlightResponse;
 import com.clv.vueling.rest.LoginRequest;
 import com.clv.vueling.rest.LoginResponse;
@@ -199,7 +200,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 	private void ourLogin(final GraphUser user, String token) {
 		try {
 			LoginRequest lr = new LoginRequest();
-			lr.setEmail("");
+			lr.setEmail("aaa");
 			lr.setIdFacebook(user.getId());
 			lr.setName(user.getName());
 			lr.setOauthTokenFB(token);
@@ -237,31 +238,39 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 	}
 
 	private void getFlightInfo(String flight) {
-		mProgressDialog.setMessage(getText(R.string.adding).toString());
-		mProgressDialog.show();
-		RequestParams params = new RequestParams();
-		params.put("flyNumber", flight);
-		RestClient.get("/api/getFly", params, new AsyncHttpResponseHandler() {
-			@Override
-			public void onFailure(Throwable error, String content) {
-				Log.e(Constant.TAG, "FAIL: " + content);
-			}
+		try {
 
-			@Override
-			public void onSuccess(String content) {
-				Log.i(Constant.TAG, "SUCCESS: " + content);
-				Gson gson = new Gson();
-				FlightResponse r = gson.fromJson(content, FlightResponse.class);
-				mFlights.add(new Flight(r.getDestination(), r.getOrigin(), r.getFlyNumber(), r.getId()));
-				((FlightAdapter) getListAdapter()).notifyDataSetChanged();
-				mAppData.saveFlights(mFlights);
-			}
+			FlightRequest fr = new FlightRequest();
+			fr.setFlyNumber(flight);
+			fr.setUser_id(mUser.getUserId());
+			Gson gson = new Gson();
+			StringEntity entity = new StringEntity(gson.toJson(fr));
+			RestClient.post(mContext, "/api/getFly", entity, "application/json", new AsyncHttpResponseHandler() {
+				@Override
+				public void onFailure(Throwable error, String content) {
+					Log.e(Constant.TAG, "FAIL: " + content);
+				}
 
-			@Override
-			public void onFinish() {
-				mProgressDialog.hide();
-			}
-		});
+				@Override
+				public void onSuccess(String content) {
+					Log.i(Constant.TAG, "SUCCESS: " + content);
+					Gson gson = new Gson();
+					FlightResponse r = gson.fromJson(content, FlightResponse.class);
+					mFlights.add(new Flight(r.getDestination(), r.getOrigin(), r.getFlyNumber(), r.getId()));
+					((FlightAdapter) getListAdapter()).notifyDataSetChanged();
+					mAppData.saveFlights(mFlights);
+				}
+
+				@Override
+				public void onFinish() {
+					mProgressDialog.hide();
+				}
+			});
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	class FlightAdapter extends BaseAdapter {

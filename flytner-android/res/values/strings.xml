@@ -13,5 +13,6 @@
     <string name="add_flight">Add flight</string>
     <string name="flight_number">Flight number</string>
     <string name="adding">Adding flight</string>
+    <string name="add_taxi">Add taxi</string>
     
 </resources>

@@ -20,6 +20,10 @@ public class RestClient {
   public static void post(Context context, String url, StringEntity entity, String type, AsyncHttpResponseHandler responseHandler) {
       client.post(context, getAbsoluteUrl(url), entity, type, responseHandler);
   }
+  
+  public static void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
+      client.post(getAbsoluteUrl(url), params, responseHandler);
+  }
 
   private static String getAbsoluteUrl(String relativeUrl) {
       return BASE_URL + relativeUrl;

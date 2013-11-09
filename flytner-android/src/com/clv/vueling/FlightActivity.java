@@ -1,7 +1,10 @@
 package com.clv.vueling;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import org.codehaus.jackson.JsonNode;
@@ -25,11 +28,21 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.clv.vueling.MainActivity.FlightAdapter;
 import com.clv.vueling.adapters.DatabaseAdapter;
 import com.clv.vueling.fragment.FragmentChat;
+import com.clv.vueling.fragment.FragmentPassengers;
+import com.clv.vueling.fragment.FragmentTaxis;
 import com.clv.vueling.model.Flight;
 import com.clv.vueling.model.Preferences;
+import com.clv.vueling.rest.FlightResponse;
+import com.clv.vueling.rest.PassengerResponse;
+import com.clv.vueling.rest.RestClient;
 import com.clv.vueling.util.Constant;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketException;
@@ -147,21 +160,13 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
 			fragments[0] = new FragmentChat();
+			fragments[1] = new FragmentPassengers();
+			fragments[2] = new FragmentTaxis();
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			switch (position) {
-			case 0:
-				return fragments[0];
-			default:
-				Fragment fragment = new DummySectionFragment();
-				Bundle args = new Bundle();
-				args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, position + 1);
-				fragment.setArguments(args);
-				return fragment;
-
-			}
+			return fragments[position];
 		}
 
 		@Override
@@ -185,31 +190,7 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 		}
 	}
 
-	/**
-	 * A dummy fragment representing a section of the app, but that simply
-	 * displays dummy text.
-	 */
-	public static class DummySectionFragment extends Fragment {
-		/**
-		 * The fragment argument representing the section number for this
-		 * fragment.
-		 */
-		public static final String ARG_SECTION_NUMBER = "section_number";
-
-		public DummySectionFragment() {
-		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_main_dummy, container, false);
-			TextView dummyTextView = (TextView) rootView.findViewById(R.id.section_label);
-			dummyTextView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-			return rootView;
-		}
-	}
-
 	public void start() {
-
 		db.open();
 		final String wsuri = Preferences.WS + "room/chat?username=" + URLEncoder.encode(nameUser) + "&amp;userId="
 				+ idUser + "&amp;pid=" + idChat + "&amp;typeChat=2";
@@ -244,7 +225,7 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 						Log.d(TAG, "username: " + username);
 
 						// prueba recibir
-						if (kind.equals("talk") && !user.equals(idUser)) {
+						if (kind != null && kind.equals("talk") && user != null && !user.equals(idUser)) {
 							showMessage(username, message, true);
 							db.insertMessage(idChat, user, message, Integer.toString(message.length()), "texto", true,username);
 							db.updateLastMessage(idChat, message);
@@ -271,6 +252,24 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 
 			Log.d(TAG, e.toString());
 		}
+		
+		RequestParams params = new RequestParams();
+		params.put("fly_id", mFlight.getId());
+		RestClient.get("/api/getIdsUsersFly", params, new AsyncHttpResponseHandler() {
+			@Override
+			public void onFailure(Throwable error, String content) {
+				Log.e("passengers", "FAIL: " + content);
+			}
+
+			@Override
+			public void onSuccess(String content) {
+				Log.i("passengers", "SUCCESS: " + content);
+				Gson gson = new Gson();
+				Type listOfTestObject = new TypeToken<List<PassengerResponse>>(){}.getType();
+				ArrayList<PassengerResponse> list = gson.fromJson(content, listOfTestObject);
+				((FragmentPassengers)mSectionsPagerAdapter.getItem(1)).fillData(list);
+			}
+		});
 	}
 
 	public void loadMessage() {
@@ -284,7 +283,7 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 			if (c.moveToFirst()) {
 				do {
 					// Si el mensaje es mio
-					Log.i("DB", "ENTRO");
+//					Log.i("DB", "ENTRO");
 					if (c.getString(c.getColumnIndex("user_from")).equals(Preferences.getIdUser(getBaseContext())))
 						showMessage(c.getString(c.getColumnIndex("username")), c.getString(c.getColumnIndex("message")), false);
 					else

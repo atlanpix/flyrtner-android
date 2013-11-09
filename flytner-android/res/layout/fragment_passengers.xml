@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp" android:background="#d8d8d8">
+    
+    
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:divider="#00000000"
+        android:dividerHeight="5dp"
+        android:drawSelectorOnTop="false" />
+
+
+    <TextView
+        android:padding="20dp"
+        android:textSize="20sp"
+        android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="There is not other passengers yet" />
+
+</LinearLayout>
