@@ -3,12 +3,12 @@
 
     <string name="app_id">382352378563410</string>
     <string name="app_name">flytner</string>
-    <string name="action_profile">Profile</string>
+    <string name="action_profile">Logout</string>
     <string name="title_section1">Chat</string>
     <string name="title_section2">Passengers</string>
     <string name="title_section3">Taxis</string>
     <string name="your_profile">Your profile</string>
-    <string name="logged">Logged correctly as: </string>
+    <string name="logged">Welcome </string>
     <string name="logging">Logging...</string>
     <string name="add_flight">Add flight</string>
     <string name="flight_number">Flight number</string>

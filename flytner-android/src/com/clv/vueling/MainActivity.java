@@ -82,8 +82,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 
 			}
 		});
-		if (mUser != null)
-			facebookLogin();
+		facebookLogin();
 	}
 
 	@Override
@@ -115,23 +114,24 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 		}
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		// Respond to the action bar's Up/Home button
-		case R.id.action_profile:
-			launchFacebookActivity();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+	// @Override
+	// public boolean onCreateOptionsMenu(Menu menu) {
+	// // Inflate the menu; this adds items to the action bar if it is present.
+	// getMenuInflater().inflate(R.menu.main, menu);
+	// return true;
+	// }
+	//
+	// @Override
+	// public boolean onOptionsItemSelected(MenuItem item) {
+	// switch (item.getItemId()) {
+	// // Respond to the action bar's Up/Home button
+	// case R.id.action_profile:
+	// Intent i = new Intent(this, LoginActivity.class);
+	// startActivity(i);
+	// return true;
+	// }
+	// return super.onOptionsItemSelected(item);
+	// }
 
 	private void launchFacebookActivity() {
 		Intent i = new Intent(this, LogoutActivity.class);
