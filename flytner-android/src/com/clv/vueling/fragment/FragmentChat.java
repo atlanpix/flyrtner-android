@@ -84,7 +84,7 @@ public class FragmentChat extends Fragment {
 				params.gravity = Gravity.RIGHT;
 			}
 			params.leftMargin = 10;
-			params.leftMargin = 10;
+			params.rightMargin = 10;
 			params.topMargin = 10;
 
 			textView.setLayoutParams(params);

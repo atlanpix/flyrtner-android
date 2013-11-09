@@ -2,21 +2,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    android:background="#d8d8d8"
     tools:context=".ChatActivity" >
-	
-	<EditText
+
+    <EditText
+        android:background="#fff"
         android:id="@+id/editText1"
+        android:paddingLeft="20dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_height="44dp"
         android:layout_alignParentBottom="true"
-        android:autoText="true"
-        android:hint="message text"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="false"
         android:layout_toLeftOf="@+id/button1"
-        
-        android:ems="10" >
+        android:autoText="true"
+        android:ems="10"
+        android:hint="message text" >
 
         <requestFocus />
     </EditText>
@@ -25,10 +26,10 @@
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:onClick="chatear"
-        android:text="Button"/>
+        android:text="Button" />
 
     <ScrollView
         android:id="@+id/scrollView1"
@@ -36,16 +37,14 @@
         android:layout_height="fill_parent"
         android:layout_above="@+id/button1"
         android:layout_alignLeft="@+id/alert"
-        android:layout_alignTop="@+id/alert"
-        >
-        
-        <LinearLayout
-                android:id="@+id/messagesContainer"
-                android:orientation="vertical"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
-        </LinearLayout>
+        android:layout_alignTop="@+id/alert" >
 
+        <LinearLayout
+            android:id="@+id/messagesContainer"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+        </LinearLayout>
     </ScrollView>
 
 </RelativeLayout>
