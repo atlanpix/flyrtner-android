@@ -28,9 +28,12 @@ public class AddActivity extends FragmentActivity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent data = new Intent();
-				data.putExtra("text", et.getText().toString());
-				setResult(Activity.RESULT_OK);
+				if (et.getText() != null && !et.getText().toString().isEmpty()) {
+					Intent data = new Intent();
+					data.putExtra("text", et.getText().toString());
+					setResult(Activity.RESULT_OK, data);
+					finish();
+				}
 			}
 		});
         

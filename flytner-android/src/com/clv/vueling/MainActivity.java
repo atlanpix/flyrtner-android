@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.clv.vueling.model.Flight;
 import com.clv.vueling.model.OurUser;
 import com.clv.vueling.model.Preferences;
+import com.clv.vueling.rest.FlightResponse;
 import com.clv.vueling.rest.LoginRequest;
 import com.clv.vueling.rest.LoginResponse;
 import com.clv.vueling.rest.RestClient;
@@ -42,6 +43,7 @@ import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 public class MainActivity extends ListActivity implements OnItemClickListener {
 
@@ -63,22 +65,21 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 		mProgressDialog = new ProgressDialog(mContext);
 		mProgressDialog.setCancelable(false);
 		mFlights = new ArrayList<Flight>();
-		mFlights.add(new Flight("vuelo prueba", "origen", "destino"));
-		mFlights.add(new Flight("vuelo prueba2", "origen2", "destino2"));
+		mFlights.add(new Flight("vuelo prueba", "origen", "destino", "1"));
+		mFlights.add(new Flight("vuelo prueba2", "origen2", "destino2", "2"));
 		FlightAdapter adapter = new FlightAdapter();
 		setListAdapter(adapter);
 		getListView().setOnItemClickListener(this);
 
-		((Button) findViewById(R.id.buttonAdd))
-				.setOnClickListener(new OnClickListener() {
+		((Button) findViewById(R.id.buttonAdd)).setOnClickListener(new OnClickListener() {
 
-					@Override
-					public void onClick(View v) {
-						Intent i = new Intent(mContext, AddActivity.class);
-						startActivityForResult(i, AddActivity.CODE);
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(mContext, AddActivity.class);
+				startActivityForResult(i, AddActivity.CODE);
 
-					}
-				});
+			}
+		});
 
 	}
 
@@ -96,15 +97,14 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> adapterView, View v, int position,
-			long id) {
+	public void onItemClick(AdapterView<?> adapterView, View v, int position, long id) {
 		if (mUser == null) {
 			facebookLogin();
 		} else {
 			Flight flight = (Flight) adapterView.getItemAtPosition(position);
 			Intent i = new Intent(mContext, ChatActivity.class);
 			// i.putExtra(Flight.TAG, flight);
-			i.putExtra("idChat", flight.getFlightNumber());
+			i.putExtra("idChat", flight.getId());
 			startActivity(i);
 		}
 	}
@@ -134,41 +134,32 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 		// start Facebook Login
 		ArrayList<String> permissions = new ArrayList<String>();
 		permissions.add("email");
-		FacebookUtils.openActiveSession(mActivity, true,
-				new Session.StatusCallback() {
+		FacebookUtils.openActiveSession(mActivity, true, new Session.StatusCallback() {
 
-					// callback when session changes state
-					@Override
-					public void call(final Session session, SessionState state,
-							Exception exception) {
-						if (session.isOpened()) {
+			// callback when session changes state
+			@Override
+			public void call(final Session session, SessionState state, Exception exception) {
+				if (session.isOpened()) {
 
-							// make request to the /me API
-							Request.newMeRequest(session,
-									new Request.GraphUserCallback() {
+					// make request to the /me API
+					Request.newMeRequest(session, new Request.GraphUserCallback() {
 
-										// callback after Graph API response
-										// with user
-										// object
-										@Override
-										public void onCompleted(GraphUser user,
-												Response response) {
-											if (user != null) {
-												Toast.makeText(
-														mContext,
-														getText(R.string.logged)
-																+ " "
-																+ user.getName(),
-														Toast.LENGTH_LONG)
-														.show();
-												ourLogin(user, session
-														.getAccessToken());
-											}
-										}
-									}).executeAsync();
+						// callback after Graph API response
+						// with user
+						// object
+						@Override
+						public void onCompleted(GraphUser user, Response response) {
+							if (user != null) {
+								Log.i(Constant.TAG, "LOG OK");
+								Toast.makeText(mContext, getText(R.string.logged) + " " + user.getName(),
+										Toast.LENGTH_LONG).show();
+								ourLogin(user, session.getAccessToken());
+							}
 						}
-					}
-				}, permissions);
+					}).executeAsync();
+				}
+			}
+		}, permissions);
 
 	}
 
@@ -182,45 +173,61 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 			lr.setRegId("prueba");
 			lr.setSystemPhone("prueba");
 			lr.setUsernameFB(user.getName());
-			lr.setUrlImage("http://graph.facebook.com/" + user.getId()
-					+ "/picture?type=small");
+			lr.setUrlImage("http://graph.facebook.com/" + user.getId() + "/picture?type=small");
 			Gson gson = new Gson();
 			StringEntity entity = new StringEntity(gson.toJson(lr));
-			RestClient.post(mContext, "/api/loginFacebook", entity,
-					"application/json", new AsyncHttpResponseHandler() {
-						@Override
-						public void onFailure(Throwable error, String content) {
-							Log.e(Constant.TAG, "FAIL: " + content);
-						}
+			RestClient.post(mContext, "/api/loginFacebook", entity, "application/json", new AsyncHttpResponseHandler() {
+				@Override
+				public void onFailure(Throwable error, String content) {
+					Log.e(Constant.TAG, "FAIL: " + content);
+				}
 
-						@Override
-						public void onSuccess(String content) {
-							Log.i(Constant.TAG, "SUCCESS: " + content);
-							Gson gson = new Gson();
-							LoginResponse r = gson.fromJson(content,
-									LoginResponse.class);
-							mUser = new OurUser();
-							mUser.setUserId(r.getUser_id());
-							mAppData.saveUser(mUser);
-							Preferences.setIdUser(mContext, mUser.getUserId());
-						}
+				@Override
+				public void onSuccess(String content) {
+					Log.i(Constant.TAG, "SUCCESS: " + content);
+					Gson gson = new Gson();
+					LoginResponse r = gson.fromJson(content, LoginResponse.class);
+					mUser = new OurUser();
+					mUser.setUserId(r.getUser_id());
+					mAppData.saveUser(mUser);
+					Preferences.setIdUser(mContext, mUser.getUserId());
+				}
 
-						@Override
-						public void onFinish() {
-							mProgressDialog.hide();
-						}
-					});
+				@Override
+				public void onFinish() {
+					mProgressDialog.hide();
+				}
+			});
 		} catch (UnsupportedEncodingException e) {
 			mProgressDialog.hide();
 		}
 	}
 
 	private void getFlightInfo(String flight) {
-//		try {
-//			
-//		} catch (UnsupportedEncodingException e) {
-//			mProgressDialog.hide();
-//		}
+		mProgressDialog.setMessage(getText(R.string.adding).toString());
+		mProgressDialog.show();
+		RequestParams params = new RequestParams();
+		params.put("flyNumber", flight);
+		RestClient.get("/api/getFly", params, new AsyncHttpResponseHandler() {
+			@Override
+			public void onFailure(Throwable error, String content) {
+				Log.e(Constant.TAG, "FAIL: " + content);
+			}
+
+			@Override
+			public void onSuccess(String content) {
+				Log.i(Constant.TAG, "SUCCESS: " + content);
+				Gson gson = new Gson();
+				FlightResponse r = gson.fromJson(content, FlightResponse.class);
+				mFlights.add(new Flight(r.getDestination(), r.getOrigin(), r.getFlyNumber(), r.getId()));
+				((FlightAdapter)getListAdapter()).notifyDataSetChanged();
+			}
+
+			@Override
+			public void onFinish() {
+				mProgressDialog.hide();
+			}
+		});
 	}
 
 	class FlightAdapter extends BaseAdapter {
@@ -244,15 +251,12 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View v = convertView;
 			if (v == null) {
-				LayoutInflater li = (LayoutInflater) mContext
-						.getSystemService(LAYOUT_INFLATER_SERVICE);
+				LayoutInflater li = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
 				v = li.inflate(R.layout.flight_item, null);
 			}
 			Flight flight = (Flight) getItem(position);
-			((TextView) v.findViewById(R.id.text1)).setText(flight
-					.getFlightNumber().toUpperCase(Locale.getDefault()));
-			((TextView) v.findViewById(R.id.text2)).setText(flight.getOrigin()
-					+ " - " + flight.getDestination());
+			((TextView) v.findViewById(R.id.text1)).setText(flight.getFlightNumber().toUpperCase(Locale.getDefault()));
+			((TextView) v.findViewById(R.id.text2)).setText(flight.getOrigin() + " - " + flight.getDestination());
 			return v;
 		}
 
