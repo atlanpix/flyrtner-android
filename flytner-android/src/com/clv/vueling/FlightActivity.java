@@ -98,6 +98,7 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 				actionBar.setSelectedNavigationItem(position);
 			}
 		});
+		mViewPager.setOffscreenPageLimit(2);
 
 		// For each of the sections in the app, add a tab to the action bar.
 		for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
@@ -244,8 +245,8 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 
 						// prueba recibir
 						if (kind.equals("talk") && !user.equals(idUser)) {
-							showMessage(message, true);
-							db.insertMessage(idChat, user, message, Integer.toString(message.length()), "texto", true);
+							showMessage(username, message, true);
+							db.insertMessage(idChat, user, message, Integer.toString(message.length()), "texto", true,username);
 							db.updateLastMessage(idChat, message);
 
 						}
@@ -285,9 +286,9 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 					// Si el mensaje es mio
 					Log.i("DB", "ENTRO");
 					if (c.getString(c.getColumnIndex("user_from")).equals(Preferences.getIdUser(getBaseContext())))
-						showMessage(c.getString(c.getColumnIndex("message")), false);
+						showMessage(c.getString(c.getColumnIndex("username")), c.getString(c.getColumnIndex("message")), false);
 					else
-						showMessage(c.getString(c.getColumnIndex("message")), true);
+						showMessage(c.getString(c.getColumnIndex("username")), c.getString(c.getColumnIndex("message")), true);
 				} while (c.moveToNext());
 			}
 			c.close();
@@ -302,8 +303,8 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 		finish();
 	};
 	
-	private void showMessage(String message, boolean leftSide) {
-		((FragmentChat)mSectionsPagerAdapter.getItem(0)).showMessage(message, leftSide);
+	private void showMessage(String username, String message, boolean leftSide) {
+		((FragmentChat)mSectionsPagerAdapter.getItem(0)).showMessage(username, message, leftSide);
 	}
 
 	public void chatear(View v){
@@ -314,12 +315,12 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 		if(texto != null && texto != ""){
 			mConnection.sendTextMessage("{\"text\":\""+texto + "\"}");
 			//TODO introducir mensaje base de datos
-			db.insertMessage(idChat, Preferences.getIdUser(getBaseContext()), texto, Integer.toString(texto.length()), "texto", true);
+			db.insertMessage(idChat, Preferences.getIdUser(getBaseContext()), texto, Integer.toString(texto.length()), "texto", true, nameUser);
 			db.updateLastMessage(idChat, texto);
 
 		}
 		edit.setText("");
-		showMessage(texto, false);
+		showMessage(nameUser, texto, false);
 
 	}
 		

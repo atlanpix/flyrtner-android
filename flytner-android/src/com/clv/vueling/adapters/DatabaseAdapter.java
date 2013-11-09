@@ -21,7 +21,7 @@ import com.clv.vueling.model.RowOpenConversation;
 public class DatabaseAdapter {
 
 	private static final String DATABASE_NAME = "vuqio.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 
 	//Tablas
 	private static final String TABLE_MESSAGES = "Messages";
@@ -34,6 +34,8 @@ public class DatabaseAdapter {
 	public static final String TYPE = "type_msg";
 	public static final String SIZE = "size";
 	public static final String USER_FROM = "user_from";
+	public static final String USERNAME = "username";
+
 	//Campos tabla Chats
 	public static final String ID_CREATOR = "id_creator";
 	public static final String ID_CHAT = "id_chat"; //CAMPO INCLUIDO EN TABLA MENSAJES
@@ -88,7 +90,7 @@ public class DatabaseAdapter {
 					LAST+" TEXT NOT NULL);";
 			String table_message = "CREATE TABLE " + TABLE_MESSAGES + " (" + ID_MESSAGE + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 					+ ID_CHAT + " TEXT NOT NULL, "+ USER_FROM + " TEXT NOT NULL, "+ MESSAGE + " TEXT NOT NULL, "+ TYPE + " TEXT NOT NULL, "
-					+ SIZE + " TEXT NOT NULL, " + SEND + " BOOLEAN);";
+					+ SIZE + " TEXT NOT NULL, "+ USERNAME + " TEXT NOT NULL, " + SEND + " BOOLEAN);";
 			//			String table_message = "CREATE TABLE " + TABLE_MESSAGES + " (" + ID_MESSAGE + " INTEGER PRIMARY KEY, "
 			//					+ ID_CHAT + " TEXT NOT NULL  PRIMARY KEY, "+ FROM + " TEXT NOT NULL, "+ MESSAGE + " TEXT NOT NULL, "+ TYPE + " TEXT NOT NULL, "
 			//					+ SIZE + " TEXT NOT NULL, " + SEND + " BOOLEAN);";
@@ -149,7 +151,7 @@ public class DatabaseAdapter {
 	 * @param status
 	 * @return El id de la fila nueva o -1 en caso de error
 	 */
-	public long insertMessage(String id_chat, String from, String message, String size, String type, Boolean status){
+	public long insertMessage(String id_chat, String from, String message, String size, String type, Boolean status, String username){
 		ContentValues values = new ContentValues();
 
 		
@@ -169,6 +171,7 @@ public class DatabaseAdapter {
 		values.put(SIZE, size);
 		values.put(TYPE, type);
 		values.put(SEND, status);
+		values.put(USERNAME, username);
 
 		return db.insert(TABLE_MESSAGES, null, values);
 
@@ -241,6 +244,7 @@ public class DatabaseAdapter {
 					ID_MESSAGE,
 					ID_CHAT,
 					USER_FROM,
+					USERNAME,
 					MESSAGE},
 					ID_CHAT + "=?",
 					new String[] {idChat},

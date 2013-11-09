@@ -195,7 +195,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener {
 	private void ourLogin(final GraphUser user, String token) {
 		try {
 			LoginRequest lr = new LoginRequest();
-			lr.setEmail(user.asMap().get("email").toString());
+			lr.setEmail("");
 			lr.setIdFacebook(user.getId());
 			lr.setName(user.getName());
 			lr.setOauthTokenFB(token);

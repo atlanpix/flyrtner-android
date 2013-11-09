@@ -68,40 +68,41 @@ public class FragmentChat extends Fragment {
 		fa.start();
 	}
 
-	public void showMessage(String message, boolean leftSide) {
+	public void showMessage(String username, String message, boolean leftSide) {
 
 		if (isAdded()) {
 
 			final TextView textView = new TextView(fa);
 			textView.setTextColor(Color.BLACK);
-			textView.setText(message);
+			textView.setText(username + ": " + message);
 
-			int bgRes = R.drawable.left_message_bg;
 
 			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 
 			if (!leftSide) {
-				bgRes = R.drawable.right_message_bg;
 				params.gravity = Gravity.RIGHT;
 			}
+			params.leftMargin = 10;
+			params.leftMargin = 10;
+			params.topMargin = 10;
 
 			textView.setLayoutParams(params);
 
-			textView.setBackgroundResource(bgRes);
+			textView.setBackgroundResource(R.drawable.bg_card);
 
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					messagesContainer.addView(textView);
-
-					// Scroll to bottom
-					if (scrollContainer.getChildAt(0) != null) {
-						scrollContainer.scrollTo(scrollContainer.getScrollX(), scrollContainer.getChildAt(0)
-								.getHeight());
-					}
-					scrollContainer.fullScroll(View.FOCUS_DOWN);
 				}
+			});
+			
+			scrollContainer.post(new Runnable() {            
+			    @Override
+			    public void run() {
+			    	scrollContainer.fullScroll(View.FOCUS_DOWN);              
+			    }
 			});
 		}
 	}

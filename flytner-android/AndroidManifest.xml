@@ -18,14 +18,14 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.clv.vueling.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="FlightActivity" >
+        <activity android:name="FlightActivity" android:screenOrientation="portrait" >
         </activity>
 
         <meta-data
@@ -38,7 +38,7 @@
         </activity>
         <activity android:name="ChatActivity" >
         </activity>
-        <activity android:name="com.clv.vueling.AddActivity" >
+        <activity android:name="com.clv.vueling.AddActivity" android:screenOrientation="portrait" >
         </activity>
     </application>
 
