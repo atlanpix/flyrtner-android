@@ -61,7 +61,7 @@ public class FragmentPassengers extends ListFragment {
 				v = li.inflate(R.layout.passenger_item, null);
 			}
 			PassengerResponse p = (PassengerResponse) getItem(position);
-			((TextView) v.findViewById(R.id.text1)).setText(p.getUsername().toUpperCase(Locale.getDefault()));
+			((TextView) v.findViewById(R.id.text1)).setText(p.getUsername().replace("�", "ú").toUpperCase(Locale.getDefault()));
 			ImageView iv = (ImageView) v.findViewById(R.id.imageView1);
 			ImageLoader.getInstance().displayImage(p.getUrlImage(), iv);
 //			((TextView) v.findViewById(R.id.text2)).setText(flight. + " - " + flight.getDestination());
