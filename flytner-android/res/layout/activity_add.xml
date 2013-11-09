@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:ems="10"
-        android:hint="@string/add_flight" >
+        android:ems="10" >
 
         <requestFocus />
     </EditText>
@@ -19,6 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:text="@string/add_flight" />
+        android:text="Add" />
 
 </LinearLayout>

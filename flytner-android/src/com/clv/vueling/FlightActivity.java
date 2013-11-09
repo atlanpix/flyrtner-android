@@ -12,7 +12,9 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -38,6 +40,7 @@ import com.clv.vueling.model.Preferences;
 import com.clv.vueling.rest.FlightResponse;
 import com.clv.vueling.rest.PassengerResponse;
 import com.clv.vueling.rest.RestClient;
+import com.clv.vueling.rest.TaxiCreate;
 import com.clv.vueling.util.Constant;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -149,12 +152,14 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 	}
 
+
+
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.
 	 */
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
-		
+
 		Fragment fragments[] = new Fragment[3];
 
 		public SectionsPagerAdapter(FragmentManager fm) {
@@ -227,7 +232,8 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 						// prueba recibir
 						if (kind != null && kind.equals("talk") && user != null && !user.equals(idUser)) {
 							showMessage(username, message, true);
-							db.insertMessage(idChat, user, message, Integer.toString(message.length()), "texto", true,username);
+							db.insertMessage(idChat, user, message, Integer.toString(message.length()), "texto", true,
+									username);
 							db.updateLastMessage(idChat, message);
 
 						}
@@ -252,7 +258,7 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 
 			Log.d(TAG, e.toString());
 		}
-		
+
 		RequestParams params = new RequestParams();
 		params.put("fly_id", mFlight.getId());
 		RestClient.get("/api/getIdsUsersFly", params, new AsyncHttpResponseHandler() {
@@ -265,9 +271,30 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 			public void onSuccess(String content) {
 				Log.i("passengers", "SUCCESS: " + content);
 				Gson gson = new Gson();
-				Type listOfTestObject = new TypeToken<List<PassengerResponse>>(){}.getType();
+				Type listOfTestObject = new TypeToken<List<PassengerResponse>>() {
+				}.getType();
 				ArrayList<PassengerResponse> list = gson.fromJson(content, listOfTestObject);
-				((FragmentPassengers)mSectionsPagerAdapter.getItem(1)).fillData(list);
+				((FragmentPassengers) mSectionsPagerAdapter.getItem(1)).fillData(list);
+			}
+		});
+		
+
+		RequestParams params2 = new RequestParams();
+		params2.put("flyId", mFlight.getId());
+		RestClient.get("/api/getTaxis", params2, new AsyncHttpResponseHandler() {
+			@Override
+			public void onFailure(Throwable error, String content) {
+				Log.e("taxis", "FAIL: " + content);
+			}
+
+			@Override
+			public void onSuccess(String content) {
+				Log.i("taxis", "SUCCESS: " + content);
+				Gson gson = new Gson();
+				Type listOfTestObject = new TypeToken<List<TaxiCreate>>() {
+				}.getType();
+				ArrayList<TaxiCreate> list = gson.fromJson(content, listOfTestObject);
+				((FragmentTaxis) mSectionsPagerAdapter.getItem(2)).fillData(list);
 			}
 		});
 	}
@@ -283,38 +310,41 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 			if (c.moveToFirst()) {
 				do {
 					// Si el mensaje es mio
-//					Log.i("DB", "ENTRO");
+					// Log.i("DB", "ENTRO");
 					if (c.getString(c.getColumnIndex("user_from")).equals(Preferences.getIdUser(getBaseContext())))
-						showMessage(c.getString(c.getColumnIndex("username")), c.getString(c.getColumnIndex("message")), false);
+						showMessage(c.getString(c.getColumnIndex("username")),
+								c.getString(c.getColumnIndex("message")), false);
 					else
-						showMessage(c.getString(c.getColumnIndex("username")), c.getString(c.getColumnIndex("message")), true);
+						showMessage(c.getString(c.getColumnIndex("username")),
+								c.getString(c.getColumnIndex("message")), true);
 				} while (c.moveToNext());
 			}
 			c.close();
 		}
 
-		
 	}
-	
-	@Override public void onBackPressed() {
+
+	@Override
+	public void onBackPressed() {
 		mConnection.disconnect();
 		db.close();
 		finish();
 	};
-	
+
 	private void showMessage(String username, String message, boolean leftSide) {
-		((FragmentChat)mSectionsPagerAdapter.getItem(0)).showMessage(username, message, leftSide);
+		((FragmentChat) mSectionsPagerAdapter.getItem(0)).showMessage(username, message, leftSide);
 	}
 
-	public void chatear(View v){
+	public void chatear(View v) {
 
 		Log.d("INFO2", "BOTON CHATEAR");
-		EditText edit = (EditText)findViewById(R.id.editText1);
+		EditText edit = (EditText) findViewById(R.id.editText1);
 		String texto = edit.getText().toString();
-		if(texto != null && texto != ""){
-			mConnection.sendTextMessage("{\"text\":\""+texto + "\"}");
-			//TODO introducir mensaje base de datos
-			db.insertMessage(idChat, Preferences.getIdUser(getBaseContext()), texto, Integer.toString(texto.length()), "texto", true, nameUser);
+		if (texto != null && texto != "") {
+			mConnection.sendTextMessage("{\"text\":\"" + texto + "\"}");
+			// TODO introducir mensaje base de datos
+			db.insertMessage(idChat, Preferences.getIdUser(getBaseContext()), texto, Integer.toString(texto.length()),
+					"texto", true, nameUser);
 			db.updateLastMessage(idChat, texto);
 
 		}
@@ -322,8 +352,13 @@ public class FlightActivity extends FragmentActivity implements ActionBar.TabLis
 		showMessage(nameUser, texto, false);
 
 	}
-		
 	
+	public Flight getFlight() {
+		return mFlight;
+	}
 	
+	public String getUserId() {
+		return idUser;
+	}
 
 }

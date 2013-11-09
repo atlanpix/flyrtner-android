@@ -14,5 +14,14 @@
     <string name="flight_number">Flight number</string>
     <string name="adding">Adding flight</string>
     <string name="add_taxi">Add taxi</string>
-    
+    <string name="add_taxi2">Write where to go</string>
+
+    <string-array name="taxis">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
 </resources>
